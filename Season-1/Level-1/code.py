@@ -11,19 +11,53 @@ Follow the instructions below to get started:
 6. Compare your solution with solution.py
 '''
 
-from collections import namedtuple
+#from collections import namedtuple
+#
+#Order = namedtuple('Order', 'id, items')
+#Item = namedtuple('Item', 'type, description, amount, quantity')
 
-Order = namedtuple('Order', 'id, items')
-Item = namedtuple('Item', 'type, description, amount, quantity')
+# importing the module 
+from typing import List, NamedTuple 
+from decimal import Decimal
+from decimal import getcontext
+
+MAX_VALUE = Decimal('9' * getcontext().prec)
+
+class Item(NamedTuple): 
+    type: str
+    description: str
+    amount: Decimal
+    quantity: int
+
+class Order(NamedTuple): 
+    id: int
+    items: List[Item]
+
+def toDecimal(value):
+    try:
+        return Decimal(str(value))
+    except:
+        raise ValueError("Invalid value: %s" % value)
 
 def validorder(order: Order):
-    net = 0
+    print("Order ID:", order.id)
+    print()
+
+    net = toDecimal(0)
+
+    #print("Max Value:", MAX_VALUE)
 
     for item in order.items:
         if item.type == 'payment':
-            net += item.amount
+            amount = toDecimal(item.amount)
+            print("Item amount type:", type(amount))
+            print("Item amount:", type(amount))
+
+            net += amount
+            print("Net value:", net)
+
         elif item.type == 'product':
-            net -= item.amount * item.quantity
+            net -= toDecimal(item.amount) * toDecimal(item.quantity)
         else:
             return "Invalid item type: %s" % item.type
 
