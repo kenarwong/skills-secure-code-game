@@ -19,9 +19,6 @@ Follow the instructions below to get started:
 # importing the module 
 from typing import List, NamedTuple 
 from decimal import Decimal
-from decimal import getcontext
-
-MAX_VALUE = Decimal('9' * getcontext().prec)
 
 class Item(NamedTuple): 
     type: str
@@ -44,8 +41,13 @@ def validorder(order: Order):
     print()
 
     net = toDecimal(0)
+    payable = toDecimal(0)
 
-    #print("Max Value:", MAX_VALUE)
+    products = filter(lambda item: item.type == "product", order.items)
+    for item in products:
+        payable += toDecimal(item.amount) * toDecimal(item.quantity)
+        if payable > 100000:
+            return "Total amount payable for an order exceeded"
 
     for item in order.items:
         if item.type == 'payment':
