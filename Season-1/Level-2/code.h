@@ -30,10 +30,10 @@ int userid_next = 0;
 // The following structure is implementation-speicific and it's supposed to be unknown 
 // to non-privileged users
 typedef struct {
-    bool isAdmin;
-    long userid;
-    char username[MAX_USERNAME_LEN + 1];
-    long setting[SETTINGS_COUNT];
+    bool isAdmin; // 8
+    long userid; // 8
+    char username[MAX_USERNAME_LEN + 1]; // 40
+    long setting[SETTINGS_COUNT]; // 80
 } user_account;
 
 // Simulates an internal store of active user accounts
@@ -54,6 +54,9 @@ int create_user_account(bool isAdmin, const char *username) {
         fprintf(stderr, "the username is too long");
         return INVALID_USER_ID;
     }    
+
+    printf("size of user_account %zu\n", sizeof(user_account));
+
     ua = malloc(sizeof (user_account));
     if (ua == NULL) {
         fprintf(stderr, "malloc failed to allocate memory");
@@ -62,6 +65,13 @@ int create_user_account(bool isAdmin, const char *username) {
     ua->isAdmin = isAdmin;
     ua->userid = userid_next++;
     strcpy(ua->username, username);
+    // Better way
+    // Ensure properly null-terminated
+    // memset(ua->username, 0, MAX_USERNAME_LEN + 1);
+    // Use strncpy to specify max number of characters to copy from source. This prevents buffer overflows.
+    // strncpy(ua->username, username, MAX_USERNAME_LEN);
+    // username[MAX_USERNAME_LEN] = '\0'; // Ensure null terminator when using strncpy
+
     memset(&ua->setting, 0, sizeof ua->setting);
     accounts[userid_next] = ua;
     return userid_next++;
@@ -75,14 +85,17 @@ bool update_setting(int user_id, const char *index, const char *value) {
 
     char *endptr;
     long i, v;
+    printf("index: %s\n", index);
     i = strtol(index, &endptr, 10);
-    if (*endptr)
+    printf("long conversion: %ld\n", i);
+
+    if (*endptr) // Should be null \0 after long conversion 
         return false;
 
     v = strtol(value, &endptr, 10);
-    if (*endptr || i >= SETTINGS_COUNT)
+    if (*endptr || i < 0 || i >= SETTINGS_COUNT) // Do not allow negative index keys
         return false;
-    accounts[user_id]->setting[i] = v;
+    accounts[user_id]->setting[i] = v; 
     return true;
 }
 
