@@ -27,13 +27,19 @@ class TaxPayer:
         if not path:
             pass
 
+        ## defends against path traversal attacks
+        #if path.startswith('/') or path.startswith('.') or path.startswith('..'):
+        #    return None
+
         # defends against path traversal attacks
-        if path.startswith('/') or path.startswith('.') or path.startswith('..'):
+        # Use realpath to remove symbolic links, then use commonprefix to compare against the safe directory
+        safe_dir = '/mnt/store/learn/github/skills-secure-code-game/Season-1/Level-3/'
+        if os.path.commonprefix((os.path.realpath(path),safe_dir)) != safe_dir: 
             return None
 
         # builds path
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        prof_picture_path = os.path.normpath(os.path.join(base_dir, path))
+        #base_dir = os.path.dirname(os.path.abspath(__file__))
+        prof_picture_path = os.path.normpath(os.path.join(safe_dir, path))
 
         with open(prof_picture_path, 'rb') as pic:
             picture = bytearray(pic.read())
@@ -49,7 +55,9 @@ class TaxPayer:
             raise Exception("Error: Tax form is required for all users")
 
         # defends against path traversal attacks
-        if './' in path or '../' in path:
+        # Use realpath to remove symbolic links, then use commonprefix to compare against the safe directory
+        safe_dir = '/mnt/store/learn/github/skills-secure-code-game/Season-1/Level-3/'
+        if os.path.commonprefix((os.path.realpath(path),safe_dir)) != safe_dir: 
             return None
 
         with open(path, 'rb') as form:
