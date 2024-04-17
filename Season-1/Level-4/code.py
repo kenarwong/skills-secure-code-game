@@ -133,16 +133,35 @@ class DB_CRUD_ops(object):
             cur = db_con.cursor()
 
             res = "[METHOD EXECUTED] get_stock_price\n"
-            query = "SELECT price FROM stocks WHERE symbol = '" + stock_symbol + "'"
-            res += "[QUERY] " + query + "\n"
-            if ';' in query:
-                res += "[SCRIPT EXECUTION]\n"
-                cur.executescript(query)
-            else:
-                cur.execute(query)
-                query_outcome = cur.fetchall()
-                for result in query_outcome:
-                    res += "[RESULT] " + str(result) + "\n"
+            query = "SELECT price FROM stocks WHERE symbol = (?)"
+
+            #if ';' in query:
+            #    # Why allow script execution?
+            #    #res += "[SCRIPT EXECUTION]\n"
+            #    #cur.executescript(query)
+
+            restricted_chars = ";%&^!#-"
+            has_restricted_char = any([char in query for char in restricted_chars])
+            ## checks if input contains a wrong number of single quotes against SQL injection
+            #correct_number_of_single_quotes = query.count("'") == 2 | query.count('"') == 0
+
+            # performs the checks for good cyber security and safe software against SQL injection
+            if has_restricted_char:
+                raise Exception("ERROR: Restricted character found in input")
+
+            #if not correct_number_of_single_quotes:
+            #    raise Exception("ERROR: Wrong number of single quotes found in input")
+
+            # Re-write string output
+            # Not the same command that gets passed to execute()
+            string_output = "SELECT price FROM stocks WHERE symbol = '{}'".format(stock_symbol)
+            res += "[QUERY] " + string_output + "\n"
+
+            # Execute with parameters
+            cur.execute(query, (stock_symbol,))
+            query_outcome = cur.fetchall()
+            for result in query_outcome:
+                res += "[RESULT] " + str(result) + "\n"
             return res
 
         except sqlite3.Error as e:
