@@ -28,7 +28,10 @@ class SHA256_hasher:
 
     # produces the password hash by combining password + salt because hashing
     def password_hash(self, password, salt):
+        # encode(): change encoding to utf-8
+        # digest(): hashed output
         password = binascii.hexlify(hashlib.sha256(password.encode()).digest())
+        # Blowfish cipher
         password_hash = bcrypt.hashpw(password, salt)
         return password_hash.decode('ascii')
 
