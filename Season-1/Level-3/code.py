@@ -13,6 +13,8 @@ def source():
     TaxPayer('foo', 'bar').get_prof_picture(request.args["input"])
 ### Unrelated to the exercise -- Ends here -- Please ignore
 
+safe_dir = os.path.dirname(os.path.abspath(__file__))
+
 class TaxPayer:
 
     def __init__(self, username, password):
@@ -33,7 +35,6 @@ class TaxPayer:
 
         # defends against path traversal attacks
         # Use realpath to remove symbolic links, then use commonprefix to compare against the safe directory
-        safe_dir = '/mnt/store/learn/github/skills-secure-code-game/Season-1/Level-3/'
         if os.path.commonprefix((os.path.realpath(path),safe_dir)) != safe_dir: 
             return None
 
@@ -56,7 +57,6 @@ class TaxPayer:
 
         # defends against path traversal attacks
         # Use realpath to remove symbolic links, then use commonprefix to compare against the safe directory
-        safe_dir = '/mnt/store/learn/github/skills-secure-code-game/Season-1/Level-3/'
         if os.path.commonprefix((os.path.realpath(path),safe_dir)) != safe_dir: 
             return None
 
